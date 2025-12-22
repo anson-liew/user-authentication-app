@@ -1,7 +1,8 @@
 // /screens/SignupScreen.tsx
-import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useContext, useState } from "react";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 
 type RootStackParamList = {
@@ -10,7 +11,10 @@ type RootStackParamList = {
   Home: undefined;
 };
 
-type SignupScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "Signup">;
+type SignupScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Signup"
+>;
 
 interface Props {
   navigation: SignupScreenNavigationProp;
@@ -21,6 +25,7 @@ export default function SignupScreen({ navigation }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   if (!authContext) return null;
@@ -28,41 +33,71 @@ export default function SignupScreen({ navigation }: Props) {
   const handleSignup = async () => {
     setError("");
     const result = await authContext.signup(name, email, password);
-    if (!result.success) setError(result.message || "Signup failed");
-    else navigation.replace("Home");
+    if (!result.success) {
+      setError(result.message || "Signup failed");
+    } else {
+      navigation.replace("Home");
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Signup</Text>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+    <View className="flex-1 justify-center px-6 bg-white">
+      <Text className="text-3xl font-bold text-center mb-6">
+        Signup
+      </Text>
+
+      {error ? (
+        <Text className="text-red-500 text-center mb-3">
+          {error}
+        </Text>
+      ) : null}
+
       <TextInput
-        style={styles.input}
+        className="border border-gray-300 rounded-lg px-4 py-3 mb-3"
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
+
+      <TextInput
+        className="border border-gray-300 rounded-lg px-4 py-3 mb-3"
         placeholder="Email"
         value={email}
         autoCapitalize="none"
         onChangeText={setEmail}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        secureTextEntry
-        onChangeText={setPassword}
-      />
-      <Button title="Signup" onPress={handleSignup} />
+
+      <View className="flex-row items-center border border-gray-300 rounded-lg px-4 mb-4">
+        <TextInput
+          className="flex-1"
+          placeholder="Password"
+          value={password}
+          secureTextEntry={!showPassword}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <Feather
+            name={showPassword ? "eye-off" : "eye"}
+            size={20}
+            color="gray"
+          />
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        className="bg-blue-500 py-3 rounded-lg mb-4"
+        onPress={handleSignup}
+      >
+        <Text className="text-white text-center font-semibold text-lg">
+          Signup
+        </Text>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={styles.link}>Go to Login</Text>
+        <Text className="text-blue-500 text-center">
+          Go to Login
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: { fontSize: 24, marginBottom: 20, textAlign: "center" },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 5 },
-  error: { color: "red", marginBottom: 10, textAlign: "center" },
-  link: { color: "blue", marginTop: 10, textAlign: "center" },
-});
