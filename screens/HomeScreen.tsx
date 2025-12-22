@@ -1,4 +1,3 @@
-// /screens/HomeScreen.tsx
 import Button from "@/components/Button";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useContext } from "react";

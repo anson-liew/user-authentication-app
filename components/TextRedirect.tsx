@@ -1,4 +1,3 @@
-// /components/TextRedirect.tsx
 import { Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 
 interface TextRedirectProps extends TouchableOpacityProps {

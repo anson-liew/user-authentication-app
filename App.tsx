@@ -1,6 +1,6 @@
-// import Navigation from "./Navigation";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Toast from "react-native-toast-message";
 import { AuthProvider } from "./contexts/AuthContext";
 import "./global.css";
 import HomeScreen from "./screens/HomeScreen";
@@ -25,6 +25,7 @@ export default function App() {
           <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Navigator>
+        <Toast />
       </NavigationContainer>
     </AuthProvider>
   );

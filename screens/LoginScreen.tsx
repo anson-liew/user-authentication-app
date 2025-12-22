@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import FormInput from "../components/FormInput";
 import { AuthContext } from "../contexts/AuthContext";
 
@@ -38,16 +39,16 @@ export default function LoginScreen({ navigation }: Props) {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   if (!authContext) return null;
 
   const handleLogin = async () => {
-    // reset errors
     setEmailError("");
     setPasswordError("");
 
     let hasError = false;
 
-    // Email validation
     if (!email) {
       setEmailError("Email is required");
       hasError = true;
@@ -56,7 +57,6 @@ export default function LoginScreen({ navigation }: Props) {
       hasError = true;
     }
 
-    // Password validation
     if (!password) {
       setPasswordError("Password is required");
       hasError = true;
@@ -67,14 +67,28 @@ export default function LoginScreen({ navigation }: Props) {
 
     if (hasError) return;
 
+    setLoading(true);
+
     const result = await authContext.login(email, password);
 
     if (!result.success) {
+      setLoading(false);
       setPasswordError(result.message || "Login failed");
       return;
     }
 
-    navigation.replace("Home");
+    setTimeout(() => {
+      setLoading(false);
+
+      Toast.show({
+        type: "success",
+        text1: "Login successfully!",
+        position: "top",
+        visibilityTime: 2000,
+      });
+
+      navigation.replace("Home");
+    }, 3000);
   };
 
   return (
@@ -105,7 +119,12 @@ export default function LoginScreen({ navigation }: Props) {
               error={passwordError}
             />
 
-            <Button title="Login" onPress={handleLogin} />
+            <Button
+              title="Login"
+              className="mt-5"
+              onPress={handleLogin}
+              loading={loading}
+            />
             <TextRedirect
               className="mt-4"
               onPress={() => navigation.replace("Signup")}

@@ -4,7 +4,7 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 interface User {
   name: string;
   email: string;
-  password: string; // 保存密码用于 login 验证
+  password: string;
 }
 
 interface AuthResult {
