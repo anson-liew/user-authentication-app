@@ -42,7 +42,8 @@ export default function HomeScreen({ navigation }: Props) {
 
       <Button
         title="Logout"
-        className="bg-red-500 px-6 py-3 rounded-lg"
+        bgColor="#EF4444"
+        className="px-6 py-3 rounded-lg"
         onPress={handleLogout}
       />
     </View>

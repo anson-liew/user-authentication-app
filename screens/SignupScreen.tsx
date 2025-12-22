@@ -1,8 +1,9 @@
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
+import TextRedirect from "@/components/TextRedirect";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useContext, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 
 type RootStackParamList = {
@@ -105,11 +106,9 @@ export default function SignupScreen({ navigation }: Props) {
       />
 
       <Button title="Signup" onPress={handleSignup} />
-
-      {/* Go to Login */}
-      <TouchableOpacity onPress={() => navigation.replace("Login")}>
-        <Text className="text-blue-500 text-center mt-4">Go to Login</Text>
-      </TouchableOpacity>
+      <TextRedirect onPress={() => navigation.replace("Login")}>
+        Go to Login
+      </TextRedirect>
     </View>
   );
 }

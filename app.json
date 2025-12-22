@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "user-authentication-app",
+    "name": "Anson App",
     "slug": "user-authentication-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/splash-icon-2.png",
     "scheme": "userauthenticationapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -25,6 +25,6 @@
     "experiments": {
       "reactCompiler": true
     },
-    "platforms": ["ios", "android"] 
+    "platforms": ["ios", "android"]
   }
 }

@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import TextRedirect from "@/components/TextRedirect";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useContext, useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
   Platform,
   ScrollView,
   Text,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -106,13 +106,12 @@ export default function LoginScreen({ navigation }: Props) {
             />
 
             <Button title="Login" onPress={handleLogin} />
-
-            <TouchableOpacity
-              onPress={() => navigation.replace("Signup")}
+            <TextRedirect
               className="mt-4"
+              onPress={() => navigation.replace("Signup")}
             >
-              <Text className="text-blue-500 text-center">Go to Signup</Text>
-            </TouchableOpacity>
+              Go to Signup
+            </TextRedirect>
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
