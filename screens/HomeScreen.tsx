@@ -1,7 +1,8 @@
 // /screens/HomeScreen.tsx
+import Button from "@/components/Button";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useContext } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 
 type RootStackParamList = {
@@ -39,14 +40,11 @@ export default function HomeScreen({ navigation }: Props) {
         {authContext.user.email}
       </Text>
 
-      <TouchableOpacity
+      <Button
+        title="Logout"
         className="bg-red-500 px-6 py-3 rounded-lg"
         onPress={handleLogout}
-      >
-        <Text className="text-white font-semibold text-lg">
-          Logout
-        </Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 }

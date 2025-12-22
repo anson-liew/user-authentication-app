@@ -1,8 +1,8 @@
-// /screens/SignupScreen.tsx
-import { Feather } from "@expo/vector-icons";
+import Button from "@/components/Button";
+import FormInput from "@/components/FormInput";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useContext, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 
 type RootStackParamList = {
@@ -22,81 +22,93 @@ interface Props {
 
 export default function SignupScreen({ navigation }: Props) {
   const authContext = useContext(AuthContext);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+    general?: string;
+  }>({});
 
   if (!authContext) return null;
 
   const handleSignup = async () => {
-    setError("");
-    const result = await authContext.signup(name, email, password);
-    if (!result.success) {
-      setError(result.message || "Signup failed");
-    } else {
-      navigation.replace("Home");
+    const newErrors: typeof errors = {};
+
+    if (!name) newErrors.name = "Name is required";
+
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@gmail\.com$/.test(email)) {
+      newErrors.email = "Invalid Email format, must end with @gmail.com";
     }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+
+    const result = await authContext.signup(name, email, password);
+
+    if (!result.success) {
+      setErrors({ general: result.message });
+      return;
+    }
+
+    navigation.replace("Home");
   };
 
   return (
     <View className="flex-1 justify-center px-6 bg-white">
-      <Text className="text-3xl font-bold text-center mb-6">
-        Signup
-      </Text>
+      <Text className="text-3xl font-bold text-center mb-6">Signup</Text>
 
-      {error ? (
-        <Text className="text-red-500 text-center mb-3">
-          {error}
-        </Text>
-      ) : null}
+      {errors.general && (
+        <Text className="text-red-500 text-center mb-3">{errors.general}</Text>
+      )}
 
-      <TextInput
-        className="border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Name"
+      <FormInput
+        label="Name"
         value={name}
         onChangeText={setName}
+        placeholder="Enter your name"
+        error={errors.name}
       />
 
-      <TextInput
-        className="border border-gray-300 rounded-lg px-4 py-3 mb-3"
-        placeholder="Email"
+      <FormInput
+        label="Email"
         value={email}
-        autoCapitalize="none"
         onChangeText={setEmail}
+        placeholder="example@gmail.com"
+        error={errors.email}
       />
 
-      <View className="flex-row items-center border border-gray-300 rounded-lg px-4 mb-4">
-        <TextInput
-          className="flex-1"
-          placeholder="Password"
-          value={password}
-          secureTextEntry={!showPassword}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Feather
-            name={showPassword ? "eye-off" : "eye"}
-            size={20}
-            color="gray"
-          />
-        </TouchableOpacity>
-      </View>
+      <FormInput
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Enter your name password"
+        secureTextEntry
+        error={errors.password}
+      />
 
-      <TouchableOpacity
-        className="bg-blue-500 py-3 rounded-lg mb-4"
-        onPress={handleSignup}
-      >
-        <Text className="text-white text-center font-semibold text-lg">
-          Signup
-        </Text>
-      </TouchableOpacity>
+      <Button title="Signup" onPress={handleSignup} />
 
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text className="text-blue-500 text-center">
-          Go to Login
-        </Text>
+      {/* Go to Login */}
+      <TouchableOpacity onPress={() => navigation.replace("Login")}>
+        <Text className="text-blue-500 text-center mt-4">Go to Login</Text>
       </TouchableOpacity>
     </View>
   );

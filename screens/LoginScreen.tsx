@@ -1,19 +1,17 @@
-// /screens/LoginScreen.tsx
-import { Feather } from "@expo/vector-icons";
+import Button from "@/components/Button";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useContext, useState } from "react";
 import {
-  Button,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import FormInput from "../components/FormInput";
 import { AuthContext } from "../contexts/AuthContext";
 
 type RootStackParamList = {
@@ -33,25 +31,51 @@ interface Props {
 
 export default function LoginScreen({ navigation }: Props) {
   const authContext = useContext(AuthContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   if (!authContext) return null;
 
   const handleLogin = async () => {
-    setError("");
-    if (!email || !password) {
-      setError("Please enter email and password");
+    // reset errors
+    setEmailError("");
+    setPasswordError("");
+
+    let hasError = false;
+
+    // Email validation
+    if (!email) {
+      setEmailError("Email is required");
+      hasError = true;
+    } else if (!/\S+@gmail\.com$/.test(email)) {
+      setEmailError("Email must end with @gmail.com");
+      hasError = true;
+    }
+
+    // Password validation
+    if (!password) {
+      setPasswordError("Password is required");
+      hasError = true;
+    } else if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    const result = await authContext.login(email, password);
+
+    if (!result.success) {
+      setPasswordError(result.message || "Login failed");
       return;
     }
-    const result = await authContext.login(email, password);
-    if (!result.success) setError(result.message || "Login failed");
-    else navigation.replace("Home");
-  };
 
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+    navigation.replace("Home");
+  };
 
   return (
     <KeyboardAvoidingView
@@ -60,45 +84,32 @@ export default function LoginScreen({ navigation }: Props) {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-center p-5 bg-white">
-            <Text className="text-2xl font-bold text-center mb-5">Login</Text>
-            {error ? (
-              <Text className="text-red-500 text-center mb-3">{error}</Text>
-            ) : null}
+          <View className="flex-1 justify-center px-6 bg-white">
+            <Text className="text-3xl font-bold text-center mb-6">Login</Text>
 
-            <TextInput
-              className="border border-gray-300 rounded p-3 mb-3"
-              placeholder="Email"
+            <FormInput
+              label="Email"
               value={email}
-              autoCapitalize="none"
               onChangeText={setEmail}
+              placeholder="example@gmail.com"
+              autoCapitalize="none"
+              error={emailError}
             />
 
-            <View className="flex-row items-center border border-gray-300 rounded mb-3">
-              <TextInput
-                className="flex-1 p-3"
-                placeholder="Password"
-                value={password}
-                secureTextEntry={!showPassword}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity
-                onPress={togglePasswordVisibility}
-                className="px-3"
-              >
-                <Feather
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={20}
-                  color="gray"
-                />
-              </TouchableOpacity>
-            </View>
+            <FormInput
+              label="Password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter your password"
+              secureTextEntry
+              error={passwordError}
+            />
 
             <Button title="Login" onPress={handleLogin} />
 
             <TouchableOpacity
-              onPress={() => navigation.navigate("Signup")}
-              className="mt-3"
+              onPress={() => navigation.replace("Signup")}
+              className="mt-4"
             >
               <Text className="text-blue-500 text-center">Go to Signup</Text>
             </TouchableOpacity>

@@ -4,16 +4,28 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 interface User {
   name: string;
   email: string;
+  password: string; // 保存密码用于 login 验证
+}
+
+interface AuthResult {
+  success: boolean;
+  message?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  signup: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<AuthResult>;
+  logout: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -21,33 +33,51 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [allUsers, setAllUsers] = useState<User[]>([]); // cache 所有注册用户
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadUserData = async () => {
       const savedUser = await AsyncStorage.getItem("user");
+      const savedUsers = await AsyncStorage.getItem("allUsers");
+
       if (savedUser) setUser(JSON.parse(savedUser));
+      if (savedUsers) setAllUsers(JSON.parse(savedUsers));
     };
-    loadUser();
+    loadUserData();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    if (email === "test@test.com" && password === "123456") {
-      const loggedUser = { name: "Test User", email };
-      setUser(loggedUser);
-      await AsyncStorage.setItem("user", JSON.stringify(loggedUser));
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<AuthResult> => {
+    const foundUser = allUsers.find(
+      (u) => u.email === email && u.password === password
+    );
+    if (foundUser) {
+      setUser(foundUser);
+      await AsyncStorage.setItem("user", JSON.stringify(foundUser));
       return { success: true };
     }
-    return { success: false, message: "Incorrect credentials" };
+    return { success: false, message: "Incorrect email or password" };
   };
 
-  const signup = async (name: string, email: string, password: string) => {
-    if (!name || !email || !password) return { success: false, message: "All fields are required" };
-    if (!/\S+@\S+\.\S+/.test(email)) return { success: false, message: "Invalid email" };
-    if (password.length < 6) return { success: false, message: "Password must be at least 6 characters" };
+  const signup = async (
+    name: string,
+    email: string,
+    password: string
+  ): Promise<AuthResult> => {
+    if (allUsers.some((u) => u.email === email)) {
+      return { success: false, message: "Email already exists" };
+    }
 
-    const newUser = { name, email };
+    const newUser: User = { name, email, password };
+    const updatedUsers = [...allUsers, newUser];
+    setAllUsers(updatedUsers);
     setUser(newUser);
+
+    await AsyncStorage.setItem("allUsers", JSON.stringify(updatedUsers));
     await AsyncStorage.setItem("user", JSON.stringify(newUser));
+
     return { success: true };
   };
 
